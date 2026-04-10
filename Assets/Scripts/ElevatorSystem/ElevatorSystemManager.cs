@@ -9,7 +9,7 @@ namespace ElevatorSim
         [SerializeField] private int minFloor = 0;
         [SerializeField] private int maxFloor = 3;
 
-        private readonly HashSet<HallCall> pendingHallCalls = new();
+        private readonly HashSet<int> pendingHallCalls = new();
 
         public void RequestFromFloor(int floor, Direction direction)
         {
@@ -19,19 +19,18 @@ namespace ElevatorSim
                 return;
             }
 
+            if (elevators.Count == 0)
+            {
+                Debug.LogError("No elevators configured in ElevatorSystemManager.");
+                return;
+            }
+
+            if (!pendingHallCalls.Add(floor))
+            {
+                return;
+            }
+
             ElevatorController chosen = FindBestElevator(floor, direction);
-            if (chosen == null)
-            {
-                Debug.LogError("No valid elevators configured in ElevatorSystemManager.");
-                return;
-            }
-
-            HallCall hallCall = new(floor, direction);
-            if (!pendingHallCalls.Add(hallCall))
-            {
-                return;
-            }
-
             chosen.EnqueueFloor(floor);
             chosen.FloorArrived -= OnElevatorArrived;
             chosen.FloorArrived += OnElevatorArrived;
@@ -39,7 +38,7 @@ namespace ElevatorSim
 
         private ElevatorController FindBestElevator(int requestedFloor, Direction requestedDirection)
         {
-            ElevatorController bestElevator = null;
+            ElevatorController bestElevator = elevators[0];
             int bestCost = int.MaxValue;
 
             foreach (ElevatorController elevator in elevators)
@@ -67,21 +66,7 @@ namespace ElevatorSim
 
         private void OnElevatorArrived(ElevatorController elevator, int floor)
         {
-            pendingHallCalls.Remove(new HallCall(floor, Direction.Up));
-            pendingHallCalls.Remove(new HallCall(floor, Direction.Down));
-            pendingHallCalls.Remove(new HallCall(floor, Direction.Idle));
-        }
-
-        private readonly struct HallCall
-        {
-            public int Floor { get; }
-            public Direction Direction { get; }
-
-            public HallCall(int floor, Direction direction)
-            {
-                Floor = floor;
-                Direction = direction;
-            }
+            pendingHallCalls.Remove(floor);
         }
     }
 }

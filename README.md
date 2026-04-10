@@ -34,11 +34,6 @@ This project contains a functional multi-elevator dispatch simulation that satis
    - button `OnClick` to `RequestUp`, `RequestDown`, or `RequestAny`
 7. Ensure elevator cab initial Y position corresponds to floor (`y = floor * floorHeight`).
 
-## Make it live
-
-- A GitHub Actions workflow is included at `.github/workflows/unity-webgl.yml` to build and deploy WebGL automatically.
-- Setup and hosting steps are documented in `Deployment/WEBGL_HOSTING.md`.
-
 ## Notes
 
 - `minFloor` and `maxFloor` are configurable for more than 4 floors.
